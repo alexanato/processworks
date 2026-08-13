@@ -1,0 +1,13 @@
+{
+  "itemGroup.processworks": "Example Mod Tab",
+  "block.processworks.example_block": "Example Block",
+  "item.processworks.example_item": "Example Item",
+
+  "processworks.configuration.title": "Processworks Configs",
+  "processworks.configuration.section.processworks.common.toml": "Processworks Configs",
+  "processworks.configuration.section.processworks.common.toml.title": "Processworks Configs",
+  "processworks.configuration.items": "Item List",
+  "processworks.configuration.logDirtBlock": "Log Dirt Block",
+  "processworks.configuration.magicNumberIntroduction": "Magic Number Text",
+  "processworks.configuration.magicNumber": "Magic Number"
+}
