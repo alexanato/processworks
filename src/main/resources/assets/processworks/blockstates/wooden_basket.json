@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "processworks:block/wooden_basket"
+    },
+    "waterlogged=true": {
+      "model": "processworks:block/wooden_basket"
+    }
+  }
+}
