@@ -2,12 +2,14 @@ package at.randorf.processworks.block_entitys;
 
 import at.randorf.processworks.ModBlockEntity;
 import at.randorf.processworks.ModItems;
+import at.randorf.processworks.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,48 +18,23 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemUtil;
 
 public class BasketBlockEntity extends BlockEntity {
-    private ItemStack storedStack = ItemStack.EMPTY;
-    public final ItemStackResourceHandler inventory = new ItemStackResourceHandler() {
-        @Override
-        protected ItemStack getStack() {
-            return storedStack;
-        }
+    private final ProcessInventory inventory =new ProcessInventory(128);
 
-        @Override
-        protected void setStack(ItemStack stack) {
-            storedStack = stack;
-
-            BasketBlockEntity.this.setChanged();
-
-            if (level != null && !level.isClientSide()) {
-                BlockState state = getBlockState();
-
-                level.sendBlockUpdated(
-                        getBlockPos(),
-                        state,
-                        state,
-                        Block.UPDATE_CLIENTS
-                );
-            }
-        }
-        @Override
-        protected void onRootCommit(ItemStack originalState) {
-            BasketBlockEntity.this.setChanged();
-        }
-    };
     private boolean falling = false;
 
+    public ProcessInventory getInventory(){
+        return inventory;
+    }
     public BasketBlockEntity(BlockEntityType<?> type, BlockPos worldPosition, BlockState blockState) {
         super(type, worldPosition, blockState);
     }
 
     public void setFalling(boolean falling) {
         this.falling = falling;
-    }
-    public  ItemStack getStoredStack(){
-        return storedStack;
     }
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
@@ -69,9 +46,11 @@ public class BasketBlockEntity extends BlockEntity {
         if (falling) {
             return;
         }
-        if (!storedStack.isEmpty()) {
-            Block.popResource(level, pos,storedStack.copy() );
-            storedStack = ItemStack.EMPTY;
+        if (!inventory.isEmpty()) {
+            for(ItemStack itemStack : inventory.getItems()){
+                Block.popResource(level, pos,itemStack.copy() );
+            }
+            inventory.clear();
         }
         Block.popResource(level,pos, new ItemStack(getBlockState().getBlock().asItem()));
     }

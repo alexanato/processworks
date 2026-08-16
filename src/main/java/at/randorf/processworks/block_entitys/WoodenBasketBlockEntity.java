@@ -18,7 +18,7 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class WoodenBasketBlockEntity extends BasketBlockEntity {
     public ResourceHandler<ItemResource> getItemHandler() {
-        return inventory;
+        return getInventory();
     }
     public WoodenBasketBlockEntity(BlockPos worldPosition, BlockState blockState) {
         super(ModBlockEntity.WOODEN_BASKET.get(), worldPosition, blockState);

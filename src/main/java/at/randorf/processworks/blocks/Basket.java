@@ -1,7 +1,9 @@
 package at.randorf.processworks.blocks;
 
+import at.randorf.processworks.block_entitys.BasketBlockEntity;
 import at.randorf.processworks.block_entitys.WoodenBasketBlockEntity;
 import at.randorf.processworks.entitys.BasketFallingEntity;
+import at.randorf.processworks.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +30,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
-public abstract class Basket extends FallingBasket {
+import java.util.List;
+
+public abstract class Basket extends FallingBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public Basket(Properties properties) {
@@ -66,13 +70,13 @@ public abstract class Basket extends FallingBasket {
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (FallingBlock.isFree(level.getBlockState(pos.below())) && pos.getY() >= level.getMinY()) {
             CompoundTag blockData = null;
-            ItemStack storedStack = ItemStack.EMPTY;
-            if (level.getBlockEntity(pos) instanceof WoodenBasketBlockEntity basket) {
-                blockData =basket.saveCustomOnly(level.registryAccess());
-                storedStack =basket.getStoredStack().copy();
+            ProcessInventory inventory = null;
+            if (level.getBlockEntity(pos) instanceof BasketBlockEntity basket) {
+                blockData = basket.saveCustomOnly(level.registryAccess());
+                inventory = basket.getInventory();
                 basket.setFalling(true);
             }
-            BasketFallingEntity.fall( level, pos,state,storedStack,blockData );
+            BasketFallingEntity.fall(level, pos, state,  inventory, blockData);
         }
     }
 
@@ -85,37 +89,34 @@ public abstract class Basket extends FallingBasket {
             return InteractionResult.SUCCESS;
         }
         if (itemStack.isEmpty()) {
-            ItemStack storedStack = basket.getStoredStack();
-            if (storedStack.isEmpty()) {
+            if (basket.getInventory().isEmpty()) {
                 return InteractionResult.CONSUME;
             }
-            ItemResource resource = ItemResource.of(storedStack);
-            try (Transaction transaction = Transaction.openRoot()) {
-                int extracted = basket.inventory.extract(0, resource, storedStack.getCount(), transaction);
-                if (extracted <= 0) {
-                    return InteractionResult.CONSUME;
-                }
-                transaction.commit();
-                ItemStack extractedStack = resource.toStack(extracted);
-                if (!player.getInventory().add(extractedStack)) {
-                    player.drop(extractedStack, false);
+            List<ItemStack> extracted = basket.getInventory().getItems();
+
+            basket.getInventory().clear();
+
+            for (ItemStack item : extracted) {
+                if (!player.getInventory().add(item)) {
+                    player.drop(item, false);
                 }
             }
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.playSound(null,pos,SoundEvents.ITEM_PICKUP,SoundSource.BLOCKS,1.0F,1.0F);
+            basket.setChanged();
+            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
             return InteractionResult.SUCCESS;
         }
-        try (Transaction transaction = Transaction.openRoot()) {
+        int inserted = basket.getInventory().insertItemStack(itemStack);
 
-            int inserted = basket.inventory.insert(0, ItemResource.of(itemStack), itemStack.getCount(), transaction);
-            if (inserted <= 0) {
-                return InteractionResult.CONSUME;
-            }
-            transaction.commit();
-
-            if (!player.getAbilities().instabuild) {
-                itemStack.shrink(inserted);
-            }
+        if (inserted <= 0) {
+            return InteractionResult.CONSUME;
         }
+
+        if (!player.getAbilities().instabuild) {
+            itemStack.shrink(inserted);
+        }
+        basket.setChanged();
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
         return InteractionResult.SUCCESS;
     }
 }

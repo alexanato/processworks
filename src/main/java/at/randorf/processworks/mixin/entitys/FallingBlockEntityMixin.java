@@ -38,31 +38,5 @@ public abstract class FallingBlockEntityMixin implements FallingBlockEntityAcces
             return;
         }
 
-        entity.time = 0;
-        //((EntityAccessor) (Object) this).processworks$updateFluidInteraction();
-
-        WashingRecipeInput input = new WashingRecipeInput(entity.getBlockState(), this.processworks$waterTicks);
-        Optional<RecipeHolder<WashingRecipe>> recipe = serverLevel.recipeAccess().getRecipeFor(Recipes.WASHING_TYPE.get(), input, serverLevel);
-        recipe.ifPresent(holder -> {
-            WashingRecipe washingRecipe = holder.value();
-            LootParams params = new LootParams.Builder(serverLevel).withParameter(LootContextParams.ORIGIN, entity.position()).create(LootContextParamSets.EMPTY);
-
-            LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(washingRecipe.getLootTable());
-
-            List<ItemStack> drops = lootTable.getRandomItems(params);
-
-            for (ItemStack stack : drops) {
-                entity.spawnAtLocation(serverLevel, stack);
-            }
-            entity.discard();
-        });
-
-        BlockPos pos = entity.blockPosition();
-
-        if (entity.level().getBlockState(pos).is(Blocks.BUBBLE_COLUMN)) {
-            this.processworks$waterTicks++;
-        } else {
-            this.processworks$waterTicks = 0;
-        }
     }
 }

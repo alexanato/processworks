@@ -43,7 +43,7 @@ public class WoodenBasketBlockEntityRenderer implements BlockEntityRenderer<Wood
     @Override
     public void extractRenderState(WoodenBasketBlockEntity blockEntity, WoodenBasketBlockEntityRenderState renderState, float partialTick, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(blockEntity,renderState, partialTick, cameraPos, crumblingOverlay);
-        ItemStack stack = blockEntity.getStoredStack();
+        ItemStack stack = blockEntity.getInventory().getCurrentItem();
         renderState.item.clear();
 
         if (!stack.isEmpty()) {

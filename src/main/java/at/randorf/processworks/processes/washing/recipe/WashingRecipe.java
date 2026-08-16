@@ -5,12 +5,14 @@ import at.randorf.processworks.Recipes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -25,7 +27,8 @@ import java.util.List;
 public class WashingRecipe implements Recipe<WashingRecipeInput> {
     public static final MapCodec<WashingRecipe> CODEC =
             RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    BlockState.CODEC
+                    BuiltInRegistries.ITEM
+                            .byNameCodec()
                             .fieldOf("state")
                             .forGetter(WashingRecipe::getInputState),
                     Codec.INT
@@ -41,7 +44,7 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
             ).apply(instance, WashingRecipe::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, WashingRecipe> STREAM_CODEC =
             StreamCodec.composite(
-                    ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY),
+                    ByteBufCodecs.idMapper(BuiltInRegistries.ITEM),
                     WashingRecipe::getInputState,
                     ByteBufCodecs.VAR_INT,
                     WashingRecipe::getTime,
@@ -53,7 +56,7 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
                     WashingRecipe::new
             );
 
-    public BlockState getInputState() {
+    public Item getInputState() {
         return inputState;
     }
 
@@ -65,12 +68,12 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
         return lootTable;
     }
 
-    private final BlockState inputState;
+    private final Item inputState;
     private final int time;
     private final ResourceKey<LootTable> lootTable;
 
     public WashingRecipe(
-            BlockState inputState,
+            Item inputState,
             int time,
             ResourceKey<LootTable> lootTable
     ) {
@@ -81,7 +84,7 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
 
     @Override
     public boolean matches(WashingRecipeInput input, Level level) {
-        return input.block().is(inputState.getBlock()) && input.time() >= time;
+        return input.item().getDefaultInstance().is(inputState) && input.time() >= time;
     }
     @Override
     public ItemStack assemble(WashingRecipeInput washerRecipeInput) {
