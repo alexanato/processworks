@@ -1,5 +1,6 @@
 package at.randorf.processworks;
 
+import at.randorf.processworks.registry.*;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -16,14 +17,7 @@ public class Processworks {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Processworks(IEventBus modEventBus, ModContainer modContainer){
-        Recipes.RECIPE_TYPES.register(modEventBus);
-        Recipes.RECIPE_SERIALIZERS.register(modEventBus);
-        ModBlocks.BLOCKS.register(modEventBus);
-        ModBlocks.CODECS.register(modEventBus);
-        ModItems.ITEMS.register(modEventBus);
-        ModBlockEntity.BLOCK_ENTITY_TYPES.register(modEventBus);
-        ModEntities.ENTITIES.register(modEventBus);
-        modEventBus.addListener(ModCapabilities::register);
+      ModRegister.register(modEventBus);
     }
 
     @SubscribeEvent

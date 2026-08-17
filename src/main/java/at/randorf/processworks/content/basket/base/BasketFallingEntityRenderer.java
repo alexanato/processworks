@@ -1,8 +1,8 @@
-package at.randorf.processworks.entitys.basket;
+package at.randorf.processworks.content.basket.base;
 
-import at.randorf.processworks.ModEntities;
 import at.randorf.processworks.Processworks;
-import at.randorf.processworks.render.FallingBlockRenderStateExtension;
+import at.randorf.processworks.registry.BasketRegister;
+import at.randorf.client.renderstate.FallingBlockRenderStateExtension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -89,7 +89,7 @@ public class BasketFallingEntityRenderer extends FallingBlockRenderer {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(
-                ModEntities.BASKET_FALLING.get(),
+                BasketRegister.WOODEN_BASKET_ENTITY.get(),
                 BasketFallingEntityRenderer::new
         );
     }

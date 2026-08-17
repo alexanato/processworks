@@ -1,7 +1,7 @@
 package at.randorf.processworks.processes.washing.recipe;
 
-import at.randorf.processworks.Processworks;
-import at.randorf.processworks.Recipes;
+import at.randorf.processworks.registry.BasketRegister;
+import at.randorf.processworks.registry.WashingRegister;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,9 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SandBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.List;
@@ -103,7 +100,7 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
 
     @Override
     public RecipeSerializer<? extends Recipe<WashingRecipeInput>> getSerializer() {
-        return Recipes.WASHING_SERIALIZER.get();
+        return WashingRegister.WASHING_SERIALIZER.get();
     }
 
     @Override
@@ -128,6 +125,6 @@ public class WashingRecipe implements Recipe<WashingRecipeInput> {
 
     @Override
     public RecipeType<? extends Recipe<WashingRecipeInput>> getType() {
-        return Recipes.WASHING_TYPE.get();
+        return WashingRegister.WASHING_TYPE.get();
     }
 }

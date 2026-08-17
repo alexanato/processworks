@@ -1,7 +1,8 @@
-package at.randorf.processworks.block_entitys.basket;
+package at.randorf.processworks.content.basket.base;
 
-import at.randorf.processworks.ModBlockEntity;
 import at.randorf.processworks.Processworks;
+import at.randorf.processworks.content.basket.wooden.WoodenBasketBlockEntity;
+import at.randorf.processworks.registry.BasketRegister;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -21,21 +22,21 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 import javax.annotation.Nullable;
 @EventBusSubscriber(modid = Processworks.MOD_ID, value = Dist.CLIENT)
-public class WoodenBasketBlockEntityRenderer implements BlockEntityRenderer<WoodenBasketBlockEntity, WoodenBasketBlockEntityRenderState> {
+public class BasketBlockEntityRenderer implements BlockEntityRenderer<WoodenBasketBlockEntity, BasketBlockEntityRenderState> {
 
     private final ItemModelResolver itemModelResolver;
 
-    public WoodenBasketBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+    public BasketBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
-    public WoodenBasketBlockEntityRenderState createRenderState() {
-        return new WoodenBasketBlockEntityRenderState();
+    public BasketBlockEntityRenderState createRenderState() {
+        return new BasketBlockEntityRenderState();
     }
 
     @Override
-    public void extractRenderState(WoodenBasketBlockEntity blockEntity, WoodenBasketBlockEntityRenderState renderState, float partialTick, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(WoodenBasketBlockEntity blockEntity, BasketBlockEntityRenderState renderState, float partialTick, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(blockEntity,renderState, partialTick, cameraPos, crumblingOverlay);
         ItemStack stack = blockEntity.getInventory().getCurrentItem();
         renderState.item.clear();
@@ -53,7 +54,7 @@ public class WoodenBasketBlockEntityRenderer implements BlockEntityRenderer<Wood
     }
 
     @Override
-    public void submit(WoodenBasketBlockEntityRenderState woodenBasketBlockEntityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
+    public void submit(BasketBlockEntityRenderState woodenBasketBlockEntityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
         if (woodenBasketBlockEntityRenderState.item.isEmpty()) {
             return;
         }
@@ -82,8 +83,8 @@ public class WoodenBasketBlockEntityRenderer implements BlockEntityRenderer<Wood
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                ModBlockEntity.WOODEN_BASKET.get(),
-                WoodenBasketBlockEntityRenderer::new
+                BasketRegister.WOODEN_BASKET_BE.get(),
+                BasketBlockEntityRenderer::new
         );
     }
 }

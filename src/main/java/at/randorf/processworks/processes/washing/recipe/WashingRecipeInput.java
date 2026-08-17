@@ -1,10 +1,8 @@
 package at.randorf.processworks.processes.washing.recipe;
 
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.level.block.state.BlockState;
 
 public record WashingRecipeInput(Item item, int time) implements RecipeInput {
     @Override

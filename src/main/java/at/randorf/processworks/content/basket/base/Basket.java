@@ -1,9 +1,6 @@
-package at.randorf.processworks.blocks.basket;
+package at.randorf.processworks.content.basket.base;
 
-import at.randorf.processworks.block_entitys.basket.BasketBlockEntity;
-import at.randorf.processworks.block_entitys.basket.WoodenBasketBlockEntity;
-import at.randorf.processworks.entitys.basket.BasketFallingEntity;
-import at.randorf.processworks.inventory.ProcessInventory;
+import at.randorf.processworks.common.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;

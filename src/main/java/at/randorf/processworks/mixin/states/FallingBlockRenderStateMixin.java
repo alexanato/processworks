@@ -1,6 +1,6 @@
 package at.randorf.processworks.mixin.states;
 
-import at.randorf.processworks.render.FallingBlockRenderStateExtension;
+import at.randorf.client.renderstate.FallingBlockRenderStateExtension;
 import net.minecraft.client.renderer.entity.state.FallingBlockRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,6 +1,7 @@
-package at.randorf.processworks.block_entitys.basket;
+package at.randorf.processworks.content.basket.wooden;
 
-import at.randorf.processworks.ModBlockEntity;
+import at.randorf.processworks.content.basket.base.BasketBlockEntity;
+import at.randorf.processworks.registry.BasketRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -11,6 +12,6 @@ public class WoodenBasketBlockEntity extends BasketBlockEntity {
         return getInventory();
     }
     public WoodenBasketBlockEntity(BlockPos worldPosition, BlockState blockState) {
-        super(ModBlockEntity.WOODEN_BASKET.get(), worldPosition, blockState);
+        super(BasketRegister.WOODEN_BASKET_BE.get(), worldPosition, blockState);
     }
 }

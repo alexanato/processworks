@@ -1,7 +1,10 @@
-package at.randorf.processworks.processes.washing.recipe;
+package at.randorf.processworks.processes.washing;
 
-import at.randorf.processworks.Recipes;
-import at.randorf.processworks.inventory.ProcessInventory;
+import at.randorf.processworks.common.inventory.ProcessInventory;
+import at.randorf.processworks.processes.washing.recipe.WashingRecipe;
+import at.randorf.processworks.processes.washing.recipe.WashingRecipeInput;
+import at.randorf.processworks.registry.BasketRegister;
+import at.randorf.processworks.registry.WashingRegister;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -16,11 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WashingManager {
+public class WashingProcess {
     public static List<ItemStack> getRecipeResult(ProcessInventory inventory, int bubbleTicks, ServerLevel serverLevel, Vec3 position){
         if(!inventory.isProcessable()) return null;
         WashingRecipeInput input = new WashingRecipeInput(inventory.getCurrentItem().getItem(), bubbleTicks);
-        Optional<RecipeHolder<WashingRecipe>> recipe = serverLevel.recipeAccess().getRecipeFor(Recipes.WASHING_TYPE.get(), input, serverLevel);
+        Optional<RecipeHolder<WashingRecipe>> recipe = serverLevel.recipeAccess().getRecipeFor(WashingRegister.WASHING_TYPE.get(), input, serverLevel);
         int count = inventory.getItemCount();
         List<ItemStack> drops = new ArrayList<>();
         recipe.ifPresent(holder -> {

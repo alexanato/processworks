@@ -1,14 +1,9 @@
-package at.randorf.processworks.entitys.basket;
+package at.randorf.processworks.content.basket.base;
 
-import at.randorf.processworks.ModEntities;
-import at.randorf.processworks.Recipes;
-import at.randorf.processworks.block_entitys.basket.BasketBlockEntity;
-import at.randorf.processworks.blocks.basket.Basket;
-import at.randorf.processworks.inventory.ProcessInventory;
+import at.randorf.processworks.common.inventory.ProcessInventory;
 import at.randorf.processworks.mixin.entitys.FallingBlockEntityAccessor;
-import at.randorf.processworks.processes.washing.recipe.WashingManager;
-import at.randorf.processworks.processes.washing.recipe.WashingRecipe;
-import at.randorf.processworks.processes.washing.recipe.WashingRecipeInput;
+import at.randorf.processworks.processes.washing.WashingProcess;
+import at.randorf.processworks.registry.BasketRegister;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -20,7 +15,6 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,21 +22,16 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 public class BasketFallingEntity extends FallingBlockEntity {
-    private ProcessInventory inventory;
+    private ProcessInventory inventory = new ProcessInventory(128, 7);
+
     private static final EntityDataAccessor<ItemStack> DATA_STORED_STACK = SynchedEntityData.defineId(BasketFallingEntity.class, EntityDataSerializers.ITEM_STACK);
     private int bubbleTicks = 0;
 
@@ -50,8 +39,8 @@ public class BasketFallingEntity extends FallingBlockEntity {
         super(type, level);
     }
 
-    private BasketFallingEntity(ServerLevel level, double x,double y,double z,BlockState state,ProcessInventory inventory, @Nullable CompoundTag blockData) {
-        this(ModEntities.BASKET_FALLING.get(), level);
+    private BasketFallingEntity(ServerLevel level, double x, double y, double z, BlockState state, ProcessInventory inventory, @Nullable CompoundTag blockData) {
+        this(BasketRegister.WOODEN_BASKET_ENTITY.get(), level);
 
         ((FallingBlockEntityAccessor) (Object) this).processworks$setBlockState(state);
         this.blocksBuilding = true;
@@ -101,7 +90,7 @@ public class BasketFallingEntity extends FallingBlockEntity {
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
-        output.store("BubbleTicks", Codec.INT,bubbleTicks);
+        output.store("BubbleTicks", Codec.INT, bubbleTicks);
         inventory.serialize(output.child("ProcessInventory"));
 
         ItemStack stack = getStoredStack();
@@ -148,9 +137,10 @@ public class BasketFallingEntity extends FallingBlockEntity {
             bubbleTicks = 0;
         }
     }
-    private void handleWashing(ServerLevel serverLevel){
-        List<ItemStack> drops = WashingManager.getRecipeResult(inventory,bubbleTicks,serverLevel,position());
-        if(drops==null)return;
+
+    private void handleWashing(ServerLevel serverLevel) {
+        List<ItemStack> drops = WashingProcess.getRecipeResult(inventory, bubbleTicks, serverLevel, position());
+        if (drops == null) return;
         try (Transaction transaction = Transaction.openRoot()) {
             List<ItemStack> overflow = inventory.unsafeInsert(drops, transaction);
             for (int i = 0; i < overflow.size(); i++) {

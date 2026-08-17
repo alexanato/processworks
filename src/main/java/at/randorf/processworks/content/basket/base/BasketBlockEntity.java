@@ -1,6 +1,6 @@
-package at.randorf.processworks.block_entitys.basket;
+package at.randorf.processworks.content.basket.base;
 
-import at.randorf.processworks.inventory.ProcessInventory;
+import at.randorf.processworks.common.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

@@ -1,6 +1,5 @@
-package at.randorf.processworks.inventory;
+package at.randorf.processworks.common.inventory;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.item.ItemResource;
