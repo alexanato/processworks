@@ -1,4 +1,4 @@
-package at.randorf.processworks.entitys;
+package at.randorf.processworks.entitys.basket;
 
 import at.randorf.processworks.ModEntities;
 import at.randorf.processworks.Processworks;

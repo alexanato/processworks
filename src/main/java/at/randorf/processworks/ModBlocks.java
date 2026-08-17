@@ -1,6 +1,6 @@
 package at.randorf.processworks;
 
-import at.randorf.processworks.blocks.WoodenBasket;
+import at.randorf.processworks.blocks.basket.WoodenBasket;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;

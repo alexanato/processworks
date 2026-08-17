@@ -1,8 +1,8 @@
-package at.randorf.processworks.blocks;
+package at.randorf.processworks.blocks.basket;
 
-import at.randorf.processworks.block_entitys.BasketBlockEntity;
-import at.randorf.processworks.block_entitys.WoodenBasketBlockEntity;
-import at.randorf.processworks.entitys.BasketFallingEntity;
+import at.randorf.processworks.block_entitys.basket.BasketBlockEntity;
+import at.randorf.processworks.block_entitys.basket.WoodenBasketBlockEntity;
+import at.randorf.processworks.entitys.basket.BasketFallingEntity;
 import at.randorf.processworks.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -27,8 +26,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.transfer.item.ItemResource;
-import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.List;
 
@@ -82,7 +79,7 @@ public abstract class Basket extends FallingBlock {
 
     @Override
     protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!(level.getBlockEntity(pos) instanceof WoodenBasketBlockEntity basket)) {
+        if (!(level.getBlockEntity(pos) instanceof BasketBlockEntity basket)) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {
@@ -102,8 +99,6 @@ public abstract class Basket extends FallingBlock {
                 }
             }
             level.playSound(null,pos,SoundEvents.ITEM_PICKUP,SoundSource.BLOCKS,1.0F,1.0F);
-            basket.setChanged();
-            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
             return InteractionResult.SUCCESS;
         }
         int inserted = basket.getInventory().insertItemStack(itemStack);
@@ -115,8 +110,6 @@ public abstract class Basket extends FallingBlock {
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(inserted);
         }
-        basket.setChanged();
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
         return InteractionResult.SUCCESS;
     }
 }

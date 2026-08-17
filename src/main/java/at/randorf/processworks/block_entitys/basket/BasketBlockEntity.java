@@ -1,7 +1,5 @@
-package at.randorf.processworks.block_entitys;
+package at.randorf.processworks.block_entitys.basket;
 
-import at.randorf.processworks.ModBlockEntity;
-import at.randorf.processworks.ModItems;
 import at.randorf.processworks.inventory.ProcessInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -9,7 +7,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,12 +14,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler;
-import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
-import net.neoforged.neoforge.transfer.item.ItemUtil;
 
 public class BasketBlockEntity extends BlockEntity {
-    private final ProcessInventory inventory =new ProcessInventory(128);
+    private final ProcessInventory inventory =new ProcessInventory(128,7,this::onInventoryChanged);
 
     private boolean falling = false;
 
@@ -52,12 +46,22 @@ public class BasketBlockEntity extends BlockEntity {
             }
             inventory.clear();
         }
-        Block.popResource(level,pos, new ItemStack(getBlockState().getBlock().asItem()));
+    }
+    public void onInventoryChanged() {
+        setChanged();
+
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(
+                    worldPosition,
+                    getBlockState(),
+                    getBlockState(),
+                    Block.UPDATE_CLIENTS
+            );
+        }
     }
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-
         inventory.serialize(output.child("inventory"));
     }
 

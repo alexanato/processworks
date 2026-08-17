@@ -2,6 +2,7 @@ package at.randorf.processworks.inventory;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemUtil;
@@ -13,7 +14,8 @@ import java.util.List;
 
 public class ProcessInventory extends ItemStacksResourceHandler {
     private int capacity;
-
+    private final Runnable onChanged;
+    private final int BUFFER_SLOTS;
     public ItemStack getCurrentItem() {
         for (int i = 0; i < size(); i++) {
             if (!getResource(i).isEmpty()) {
@@ -23,34 +25,34 @@ public class ProcessInventory extends ItemStacksResourceHandler {
         return ItemStack.EMPTY;
     }
 
-    public ProcessInventory(int capacity) {
-        super(capacity);
+    public ProcessInventory(int capacity,int buffer, Runnable onChanged) {
+        super((capacity + 63) / 64 + buffer);
+        BUFFER_SLOTS = buffer;
         this.capacity = capacity;
+        this.onChanged = onChanged;
     }
 
-    public ProcessInventory(int capacity, int maxSlots) {
-        super(maxSlots);
+    public ProcessInventory(int capacity,int buffer) {
+        super((capacity + 63) / 64 + buffer);
+        BUFFER_SLOTS = buffer;
         this.capacity = capacity;
+        this.onChanged = ()->{};
     }
-
+    @Override
+    protected void onContentsChanged( int index,ItemStack previousContents) {
+        super.onContentsChanged(index, previousContents);
+        onChanged.run();
+    }
     public int insertItemStack(ItemStack itemStack) {
-        if (itemStack.isEmpty() || isFull()) return 0;
-        ItemResource resource = ItemResource.of(itemStack);
-        if (!getCurrentItem().isEmpty() && !ItemResource.of(getCurrentItem()).equals(resource)) return 0;
+        if (itemStack.isEmpty())return 0;
 
-        int amount = Math.min(itemStack.count(), capacity - getItemCount());
-
-        if (amount <= 0) return 0;
-        int inserted;
         try (Transaction transaction = Transaction.openRoot()) {
-            inserted = insert(resource, amount, transaction);
+            int inserted = insert(ItemResource.of(itemStack),itemStack.getCount(),transaction);
 
-            if (inserted <= 0) {
-                return 0;
-            }
             transaction.commit();
+
+            return inserted;
         }
-        return inserted;
     }
 
     public List<ItemStack> getItems() {
@@ -61,12 +63,60 @@ public class ProcessInventory extends ItemStacksResourceHandler {
         }
         return itemStacks;
     }
+    @Override
+    public int insert(int index,ItemResource resource,int amount,TransactionContext transaction) {
+        if (amount <= 0 || resource.isEmpty())return 0;
+        ItemStack current = getCurrentItem();
 
+        if (!current.isEmpty()&& !ItemResource.of(current).equals(resource))return 0;
+
+        int freeSpace = getFreeSpace(resource);
+
+        if (freeSpace <= 0) return 0;
+        int allowedAmount = Math.min(amount, freeSpace);
+        return super.insert(index,resource,allowedAmount,transaction);
+    }
+    private int getFreeSpace(ItemResource resource) {
+        if (resource.isEmpty()) return 0;
+
+        int physicalSpace = 0;
+
+        for (int i = 0; i < size(); i++) {
+            ItemResource current = getResource(i);
+
+            if (!current.isEmpty() && !current.equals(resource)) continue;
+            if (!isValid(i, resource))continue;
+
+            int slotCapacity = getCapacityAsInt(i, resource);
+            int currentAmount = getAmountAsInt(i);
+
+            physicalSpace += Math.max(0,slotCapacity - currentAmount);
+        }
+
+        int logicalSpace = getRemainingCapacity();
+
+        return Math.min( physicalSpace, logicalSpace);
+    }
+    private int insertOld(ItemResource resource, int amount, TransactionContext transaction) {
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+
+        int inserted = 0;
+
+        for (int index = 0; index < size(); index++) {
+            inserted += super.insert(index, resource, amount - inserted, transaction);
+
+            if (inserted == amount) {
+                break;
+            }
+        }
+
+        return inserted;
+    }
     public List<ItemStack> unsafeInsert(List<ItemStack> items, TransactionContext transaction) {
         int amount = 0;
         List<ItemStack> toReturn = new ArrayList<>();
         for (ItemStack item : items) {
-            amount = insert(ItemResource.of(item), item.count(), transaction);
+            amount = insertOld(ItemResource.of(item), item.count(), transaction);
             if (amount != item.count()) {
                 ItemStack itemStack = item.copy();
                 itemStack.setCount(item.count() - amount);
@@ -106,5 +156,14 @@ public class ProcessInventory extends ItemStacksResourceHandler {
         for (int i = 0; i < a; i++) {
             set(i, ItemResource.EMPTY, 0);
         }
+    }
+    public boolean isProcessable(){
+        if(isEmpty()) return false;
+        for (ItemStack item:getItems()){
+            if(!isCurrentItem(item)){
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -3,9 +3,6 @@
   "package": "at.randorf.processworks.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "entitys.EntityMixin",
-    "entitys.FallingBlockEntityMixin",
-    "entitys.EntityAccessor",
     "entitys.FallingBlockEntityAccessor",
     "states.FallingBlockRenderStateMixin"
   ],

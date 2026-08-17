@@ -1,6 +1,6 @@
 package at.randorf.processworks;
 
-import at.randorf.processworks.entitys.BasketFallingEntity;
+import at.randorf.processworks.entitys.basket.BasketFallingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredHolder;
