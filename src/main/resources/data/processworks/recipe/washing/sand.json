@@ -1,6 +1,6 @@
 {
   "type": "processworks:washing",
-  "state": "minecraft:sand",
-  "fall_time": 1,
+  "ingredient": "minecraft:sand",
+  "time": 1,
   "loot_table": "processworks:washing/sand"
 }

@@ -1,0 +1,6 @@
+{
+  "type": "processworks:sulfur_processing",
+  "ingredient": "minecraft:sulfur",
+  "time": 1,
+  "loot_table": "processworks:sulfur_processing/sulfur"
+}

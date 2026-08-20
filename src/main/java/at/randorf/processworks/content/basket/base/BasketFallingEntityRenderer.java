@@ -86,11 +86,5 @@ public class BasketFallingEntityRenderer extends FallingBlockRenderer {
 
         poseStack.popPose();
     }
-    @SubscribeEvent
-    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(
-                BasketRegister.WOODEN_BASKET_ENTITY.get(),
-                BasketFallingEntityRenderer::new
-        );
-    }
+
 }

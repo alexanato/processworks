@@ -1,10 +1,9 @@
-package at.randorf.processworks.processes.washing.recipe;
+package at.randorf.processworks.common.process.recipe.timed;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
-public record WashingRecipeInput(Item item, int time) implements RecipeInput {
+public record AmountRecipeInput(ItemStack item, int time) implements RecipeInput {
     @Override
     public int size() {
         return 1;
@@ -14,6 +13,6 @@ public record WashingRecipeInput(Item item, int time) implements RecipeInput {
         if (slot != 0) {
             return ItemStack.EMPTY;
         }
-        return item.getDefaultInstance();
+        return item;
     }
 }

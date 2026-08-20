@@ -1,0 +1,6 @@
+{
+  "type": "processworks:crushing",
+  "ingredient": "minecraft:stone",
+  "time": 1,
+  "loot_table": "processworks:crushing/stone"
+}

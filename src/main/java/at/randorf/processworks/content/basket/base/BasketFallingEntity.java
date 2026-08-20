@@ -1,9 +1,11 @@
 package at.randorf.processworks.content.basket.base;
 
 import at.randorf.processworks.common.inventory.ProcessInventory;
+import at.randorf.processworks.common.process.recipe.timed.AmountProcessManager;
 import at.randorf.processworks.mixin.entitys.FallingBlockEntityAccessor;
-import at.randorf.processworks.processes.washing.WashingProcess;
 import at.randorf.processworks.registry.BasketRegister;
+import at.randorf.processworks.registry.SulfurProcessingRegister;
+import at.randorf.processworks.registry.WashingRegister;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +35,9 @@ public class BasketFallingEntity extends FallingBlockEntity {
     private ProcessInventory inventory = new ProcessInventory(128, 7);
 
     private static final EntityDataAccessor<ItemStack> DATA_STORED_STACK = SynchedEntityData.defineId(BasketFallingEntity.class, EntityDataSerializers.ITEM_STACK);
+
     private int bubbleTicks = 0;
+    private int sulfurTicks = 0;
 
     public BasketFallingEntity(EntityType<? extends FallingBlockEntity> type, Level level) {
         super(type, level);
@@ -91,6 +95,7 @@ public class BasketFallingEntity extends FallingBlockEntity {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.store("BubbleTicks", Codec.INT, bubbleTicks);
+        output.store("SulfurTicks", Codec.INT, sulfurTicks);
         inventory.serialize(output.child("ProcessInventory"));
 
         ItemStack stack = getStoredStack();
@@ -104,6 +109,7 @@ public class BasketFallingEntity extends FallingBlockEntity {
         super.readAdditionalSaveData(input);
         inventory.deserialize(input.childOrEmpty("ProcessInventory"));
         bubbleTicks = input.read("BubbleTicks", Codec.INT).orElse(0);
+        sulfurTicks = input.read("SulfurTicks", Codec.INT).orElse(0);
         setStoredStack(inventory.getCurrentItem());
     }
 
@@ -136,10 +142,33 @@ public class BasketFallingEntity extends FallingBlockEntity {
         } else {
             bubbleTicks = 0;
         }
+        if(!wasLastSulfur) sulfurTicks = 0;
+        else  wasLastSulfur = false;
+    }
+
+    private boolean wasLastSulfur = false;
+
+    public void handleSulfurProcessing() {
+        if (!(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        sulfurTicks++;
+        wasLastSulfur = true;
+        List<ItemStack> drops = AmountProcessManager.process(inventory, sulfurTicks, serverLevel, position(), SulfurProcessingRegister.SULFUR_PROCESSING_TYPE.get());
+        if (drops == null) return;
+        try (Transaction transaction = Transaction.openRoot()) {
+            List<ItemStack> overflow = inventory.unsafeInsert(drops, transaction);
+            for (int i = 0; i < overflow.size(); i++) {
+                spawnAtLocation(serverLevel, overflow.get(i));
+            }
+            transaction.commit();
+        }
+        sulfurTicks = 0;
+        updateBlockData();
     }
 
     private void handleWashing(ServerLevel serverLevel) {
-        List<ItemStack> drops = WashingProcess.getRecipeResult(inventory, bubbleTicks, serverLevel, position());
+        List<ItemStack> drops = AmountProcessManager.process(inventory, bubbleTicks, serverLevel, position(), WashingRegister.WASHING_TYPE.get());
         if (drops == null) return;
         try (Transaction transaction = Transaction.openRoot()) {
             List<ItemStack> overflow = inventory.unsafeInsert(drops, transaction);

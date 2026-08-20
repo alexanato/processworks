@@ -29,6 +29,9 @@ public class ModRegister {
     public static void register(IEventBus modEventBus){
         BasketRegister.init();
         WashingRegister.init();
+        SulfurProcessingRegister.init();
+        CrushingCrateRegister.init();
+        CrushingRegister.init();
 
         ModRegister.RECIPE_TYPES.register(modEventBus);
         ModRegister.RECIPE_SERIALIZERS.register(modEventBus);

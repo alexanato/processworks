@@ -1,6 +1,9 @@
 package at.randorf.processworks.content.basket.base;
 
+import at.randorf.processworks.common.inventory.HasProcessInventory;
 import at.randorf.processworks.common.inventory.ProcessInventory;
+import at.randorf.processworks.common.inventory.interaction.PlayerInventoryInteractable;
+import at.randorf.processworks.common.process.machine.simple.SimpleMachineBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.List;
 
-public abstract class Basket extends FallingBlock {
+public abstract class Basket extends FallingBlock implements PlayerInventoryInteractable {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public Basket(Properties properties) {
@@ -76,37 +79,6 @@ public abstract class Basket extends FallingBlock {
 
     @Override
     protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!(level.getBlockEntity(pos) instanceof BasketBlockEntity basket)) {
-            return InteractionResult.PASS;
-        }
-        if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
-        }
-        if (itemStack.isEmpty()) {
-            if (basket.getInventory().isEmpty()) {
-                return InteractionResult.CONSUME;
-            }
-            List<ItemStack> extracted = basket.getInventory().getItems();
-
-            basket.getInventory().clear();
-
-            for (ItemStack item : extracted) {
-                if (!player.getInventory().add(item)) {
-                    player.drop(item, false);
-                }
-            }
-            level.playSound(null,pos,SoundEvents.ITEM_PICKUP,SoundSource.BLOCKS,1.0F,1.0F);
-            return InteractionResult.SUCCESS;
-        }
-        int inserted = basket.getInventory().insertItemStack(itemStack);
-
-        if (inserted <= 0) {
-            return InteractionResult.CONSUME;
-        }
-
-        if (!player.getAbilities().instabuild) {
-            itemStack.shrink(inserted);
-        }
-        return InteractionResult.SUCCESS;
+        return handleInventoryInteraction(itemStack,level,pos,player);
     }
 }
